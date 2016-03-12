@@ -67,6 +67,11 @@ public class MorseCode {
         }
     }
     
+    /**
+     * method obsolete. delete later
+     * @param input
+     * @return
+     */
     private String getMorseCode(String input){
         char[] a = new char[100];
         StringBuilder output = new StringBuilder();
@@ -83,11 +88,27 @@ public class MorseCode {
     }
             
     public static boolean[][][] toMorseCode(String phrase) {
-        return new boolean[0][0][0];
+        if (phrase != null) {
+        	String[] words = phrase.trim().split("\\s+");
+        	boolean[][][] phraseMorse = new boolean[words.length][][];
+        	for (int index = 0; index < words.length; index++) {
+        		phraseMorse[index] = wordToMorseCode(words[index].trim());
+        	}
+        	return phraseMorse;
+        }
+        else {
+    	    return new boolean[0][0][0];
+        }
     }
     
-    public static boolean[] wordToMorseCode(String word) {
-       return new boolean[] {}; 
+    public static boolean[][] wordToMorseCode(String word) {
+    	boolean[][] wordMorse = new boolean[word.length()][];
+    	for(int i = 0; i < word.length(); i++){
+    		wordMorse[i] = charToMorseCode(word.charAt(i));
+    		
+    	}
+    	  	
+       return wordMorse; 
     }
     
     public static boolean[] charToMorseCode(char character) {
