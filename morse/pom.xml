@@ -2,20 +2,82 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>IoT4J-Learning-Tutorials-Maven</groupId>
   <artifactId>IoT4J-Learning-Tutorials-Maven</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.1</version>
   <name>IoT4J-Learning-Tutorials-Maven</name>
-  <dependencies>
-  <dependency>
-	<groupId>com.pi4j</groupId>
-	<artifactId>pi4j-core</artifactId>
-	<version>1.0</version>
-</dependency>
-<dependency>
-	<groupId>junit</groupId>
-	<artifactId>junit</artifactId>
-	<version>4.12</version>
-</dependency>
-
-  </dependencies>
   
+  <build>
+    <finalName>morse</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.6</version>
+        <configuration>
+          <!-- get all project dependencies -->
+		  <descriptorRefs>
+			<descriptorRef>jar-with-dependencies</descriptorRef>
+		  </descriptorRefs>
+		  <!-- MainClass in mainfest make a executable jar -->
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>lib/</classpathPrefix>
+              <mainClass>uk.org.ljc.RaspberryPiHacking</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+        <executions>
+		  <execution>
+			<id>make-assembly</id>
+            <!-- bind to the packaging phase -->
+			<phase>package</phase> 
+			  <goals>
+				<goal>single</goal>
+			  </goals>
+			</execution>
+		</executions>
+      </plugin>
+      <plugin>
+    	<groupId>org.apache.maven.plugins</groupId>
+    	<artifactId>maven-antrun-plugin</artifactId>
+    	<version>1.8</version>
+    	<configuration>
+    	  <properties>
+    	    <pi.user>pi</pi.user>
+    	    <pi.password>raspberry</pi.password>
+    	    <pi.host>172.16.26.71</pi.host>
+    	    <pi.target.dir>~/project</pi.target.dir>
+    	  </properties>
+        	<tasks>
+        		<echo message="Deploying to Raspberry Pi!" />
+        		<echo message="Copying runtime libraries to ${project.build.directory}/lib: ${runtime_classpath}" />
+        		<copy toDir="${project.build.directory}/lib" flatten="true">
+        		  <path path="${runtime_classpath}"></path>
+        		</copy>
+        		<echo message="Deploying files to raspberry pi on ${pi.host}" />
+        		<scp todir="${pi.user}@${pi.host}:${pi.target.dir}/lib"
+                     passphrase="${pi.password}" trust="true" failonerror="true" verbose="true" keyfile="${pi.publicKeyFile}">
+                    <fileset dir="${project.build.directory}/lib"/>
+                </scp>
+                <echo message="Executing program" />
+                <sshexec command="export DISPLAY=:0.0;java -jar ${pi.target.dir}/${project.build.finalName}.jar > /dev/null 2>&amp;1 &amp; echo $!" host="${pi.host}" username="${pi.user}" keyfile="${pi.publicKeyFile}"
+                passphrase="" trust="true" failonerror="true"/>
+        	</tasks>
+        </configuration>
+      </plugin>	
+    </plugins>
+  </build>
+  <dependencies>
+  	<dependency>
+		<groupId>com.pi4j</groupId>
+		<artifactId>pi4j-core</artifactId>
+		<version>1.0</version>
+  	</dependency>
+	<dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+		<version>4.12</version>
+		<scope>test</scope>
+	</dependency>
+  </dependencies>
 </project>
